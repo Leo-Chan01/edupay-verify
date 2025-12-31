@@ -11,10 +11,7 @@ import 'package:edupay_verify/core/services/snackbar_service.dart';
 class DashboardScreen extends ConsumerStatefulWidget {
   final StatefulNavigationShell navigationShell;
 
-  const DashboardScreen({
-    super.key,
-    required this.navigationShell,
-  });
+  const DashboardScreen({super.key, required this.navigationShell});
 
   @override
   ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
@@ -39,7 +36,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final connectivityAsync = ref.watch(connectivityStreamProvider);
-    
+
     final isOnline = connectivityAsync.when(
       data: (online) {
         if (!online && !_hasShownOfflineMessage) {
@@ -53,7 +50,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         return online;
       },
       loading: () => true,
-      error: (_, __) => false,
+      error: (_, _) => false,
     );
 
     return Scaffold(

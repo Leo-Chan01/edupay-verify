@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:edupay_verify/core/localization/app_strings.dart';
 import 'package:edupay_verify/features/auth/presentation/screens/login_screen.dart';
 import 'package:edupay_verify/features/dashboard/presentation/screens/dashboard_screen.dart';
 import 'package:edupay_verify/features/dashboard/presentation/screens/home_screen.dart';
 import 'package:edupay_verify/features/history/presentation/screens/history_screen.dart';
 import 'package:edupay_verify/features/offline/presentation/screens/offline_screen.dart';
+import 'package:edupay_verify/features/verification/presentation/screens/qr_scanner_screen.dart';
+import 'package:edupay_verify/features/verification/presentation/screens/manual_search_screen.dart';
+import 'package:edupay_verify/features/verification/presentation/screens/verification_result_screen.dart';
 import 'package:edupay_verify/features/auth/providers/auth_provider.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
-final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(debugLabel: 'shellHome');
-final _shellNavigatorOfflineKey = GlobalKey<NavigatorState>(debugLabel: 'shellOffline');
-final _shellNavigatorHistoryKey = GlobalKey<NavigatorState>(debugLabel: 'shellHistory');
+final _shellNavigatorHomeKey = GlobalKey<NavigatorState>(
+  debugLabel: 'shellHome',
+);
+final _shellNavigatorOfflineKey = GlobalKey<NavigatorState>(
+  debugLabel: 'shellOffline',
+);
+final _shellNavigatorHistoryKey = GlobalKey<NavigatorState>(
+  debugLabel: 'shellHistory',
+);
 
 final goRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -52,12 +59,23 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/home',
                 name: 'home',
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: HomeScreen(
-                    onQRScanTap: _onQRScanTap,
-                    onManualSearchTap: _onManualSearchTap,
-                  ),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: HomeScreen()),
+              ),
+              GoRoute(
+                path: '/qr-scanner',
+                name: 'qr-scanner',
+                builder: (context, state) => const QRScannerScreen(),
+              ),
+              GoRoute(
+                path: '/manual-search',
+                name: 'manual-search',
+                builder: (context, state) => const ManualSearchScreen(),
+              ),
+              GoRoute(
+                path: '/verification-result',
+                name: 'verification-result',
+                builder: (context, state) => const VerificationResultScreen(),
               ),
             ],
           ),
@@ -67,9 +85,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/offline',
                 name: 'offline',
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: OfflineScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: OfflineScreen()),
               ),
             ],
           ),
@@ -79,9 +96,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/history',
                 name: 'history',
-                pageBuilder: (context, state) => const NoTransitionPage(
-                  child: HistoryScreen(),
-                ),
+                pageBuilder: (context, state) =>
+                    const NoTransitionPage(child: HistoryScreen()),
               ),
             ],
           ),
@@ -90,11 +106,3 @@ final goRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
-
-void _onQRScanTap() {
-  // TODO: Navigate to QR scanner
-}
-
-void _onManualSearchTap() {
-  // TODO: Navigate to manual search
-}
