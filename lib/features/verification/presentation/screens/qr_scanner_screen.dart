@@ -14,7 +14,7 @@ class QRScannerScreen extends ConsumerStatefulWidget {
 }
 
 class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
-  MobileScannerController? _scannerController;
+  late MobileScannerController _scannerController;
   bool _isProcessing = false;
 
   @override
@@ -28,7 +28,7 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
 
   @override
   void dispose() {
-    _scannerController?.dispose();
+    _scannerController.dispose();
     super.dispose();
   }
 
@@ -97,6 +97,37 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
         children: [
           MobileScanner(
             controller: _scannerController,
+            errorBuilder: (context, error, child) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: colorScheme.error,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        AppStrings.cameraAccessDenied,
+                        style: textTheme.titleMedium,
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Please enable camera permissions in Settings.',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
             onDetect: (capture) {
               final List<Barcode> barcodes = capture.barcodes;
               for (final barcode in barcodes) {
