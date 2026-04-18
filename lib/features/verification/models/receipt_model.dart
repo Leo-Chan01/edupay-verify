@@ -64,25 +64,33 @@ class ReceiptModel {
 
   factory ReceiptModel.fromJson(Map<String, dynamic> json) {
     return ReceiptModel(
-      receiptId: json['receipt_id'] as String,
-      reference: json['reference'] as String,
-      studentName: json['student_name'] as String,
-      studentId: json['student_id'] as String,
-      program: json['program'] as String,
-      session: json['session'] as String,
-      transactionId: json['transaction_id'] as String,
-      description: json['description'] as String,
-      amount: json['amount'] as String,
-      paymentType: json['payment_type'] as String,
-      feesTotalPaid: json['fees_total_paid'] as String,
-      outstanding: json['outstanding'] as String,
-      dateTime: json['date_time'] as String,
-      paymentMethod: json['payment_method'] as String,
-      status: json['status'] as String,
-      remarks: json['remarks'] as String?,
-      verificationTime: json['verification_time'] as String,
+      receiptId: _stringValue(json['receipt_id']),
+      reference: _stringValue(json['reference']),
+      studentName: _stringValue(json['student_name']),
+      studentId: _stringValue(json['student_id'], fallback: 'N/A'),
+      program: _stringValue(json['program'], fallback: 'N/A'),
+      session: _stringValue(json['session'], fallback: 'N/A'),
+      transactionId: _stringValue(json['transaction_id']),
+      description: _stringValue(json['description']),
+      amount: _stringValue(json['amount']),
+      paymentType: _stringValue(json['payment_type']),
+      feesTotalPaid: _stringValue(json['fees_total_paid']),
+      outstanding: _stringValue(json['outstanding']),
+      dateTime: _stringValue(json['date_time']),
+      paymentMethod: _stringValue(json['payment_method']),
+      status: _stringValue(json['status']),
+      remarks: json['remarks']?.toString(),
+      verificationTime: _stringValue(
+        json['verification_time'],
+        fallback: DateTime.now().toIso8601String(),
+      ),
       offline: json['offline'] as bool? ?? false,
     );
+  }
+
+  static String _stringValue(dynamic value, {String fallback = ''}) {
+    final text = value?.toString() ?? '';
+    return text.isEmpty ? fallback : text;
   }
 
   bool get isValid => status.toLowerCase() == 'success';

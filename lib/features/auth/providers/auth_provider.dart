@@ -1,7 +1,10 @@
 import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:edupay_verify/core/localization/app_strings.dart';
+import 'package:edupay_verify/core/services/edupay_api_service.dart';
 import 'package:edupay_verify/core/services/storage_service.dart';
-import 'package:edupay_verify/features/auth/models/admin_model.dart';
+import 'package:edupay_verify/features/auth/data/models/admin_model.dart';
 
 class AuthState {
   final bool isLoggedIn;
@@ -32,9 +35,11 @@ class AuthState {
 }
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier() : super(AuthState()) {
+  AuthNotifier(this._apiService) : super(AuthState()) {
     checkSavedLogin();
   }
+
+  final EduPayApiService _apiService;
 
   Future<void> checkSavedLogin() async {
     final savedAdmin = StorageService.getAdmin();
@@ -46,41 +51,44 @@ class AuthNotifier extends StateNotifier<AuthState> {
           isLoggedIn: true,
           admin: admin,
         );
-      } catch (e) {
+      } catch (_) {
         await StorageService.removeAdmin();
       }
     }
   }
 
   Future<bool> login(String username, String password) async {
-    if (username.isEmpty || password.isEmpty) {
+    if (username.trim().isEmpty || password.trim().isEmpty) {
       state = state.copyWith(
-        errorMessage: 'Please enter both username and password',
+        errorMessage: AppStrings.pleaseEnterCredentials,
       );
       return false;
     }
 
     state = state.copyWith(isLoading: true, errorMessage: null);
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final admin = await _apiService.adminLogin(
+        email: username.trim(),
+        password: password,
+      );
 
-    // Mock authentication - accept any credentials for demo
-    final admin = AdminModel(
-      id: 'ADM${DateTime.now().millisecondsSinceEpoch}',
-      name: 'Admin User',
-      username: username,
-    );
+      await StorageService.saveAdmin(jsonEncode(admin.toJson()));
 
-    await StorageService.saveAdmin(jsonEncode(admin.toJson()));
+      state = state.copyWith(
+        isLoggedIn: true,
+        admin: admin,
+        isLoading: false,
+      );
 
-    state = state.copyWith(
-      isLoggedIn: true,
-      admin: admin,
-      isLoading: false,
-    );
-
-    return true;
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: e.toString().replaceFirst('Exception: ', ''),
+      );
+      return false;
+    }
   }
 
   Future<void> logout() async {
@@ -90,5 +98,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
 }
 
 final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier();
+  final apiService = ref.watch(edupayApiServiceProvider);
+  return AuthNotifier(apiService);
 });

@@ -1,33 +1,33 @@
 import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:edupay_verify/features/verification/models/receipt_model.dart';
+import 'package:edupay_verify/core/localization/app_strings.dart';
+import 'package:edupay_verify/core/services/edupay_api_service.dart';
 import 'package:edupay_verify/core/services/storage_service.dart';
+import 'package:edupay_verify/features/auth/data/models/admin_model.dart';
+import 'package:edupay_verify/features/verification/models/receipt_model.dart';
 
 class VerificationService {
-  Future<ReceiptModel> verifyOnline(String identifier) async {
-    // Simulate API call
-    await Future.delayed(const Duration(milliseconds: 800));
+  VerificationService(this._apiService);
 
-    // Mock data matching HTML sample
-    return ReceiptModel(
-      receiptId: identifier,
-      reference: 'EOCNS/24/0002/GNS',
-      studentName: 'Demo One',
-      studentId: 'EOCNS/24/0002/GNS',
-      program: 'Medical Science',
-      session: '2025/2026',
-      transactionId:
-          identifier.startsWith('RCPT') ? identifier : 'RCPT-${DateTime.now().millisecondsSinceEpoch}-3617',
-      description: 'Payment for Tuition Fee',
-      amount: '₦110.00',
-      paymentType: 'Part Payment',
-      feesTotalPaid: '₦4,410.00',
-      outstanding: '₦45,590.00',
-      dateTime: '27 Dec 2025, 16:50',
-      paymentMethod: 'online',
-      status: 'Success',
-      remarks: 'Semester tuition fee payment',
-      verificationTime: DateTime.now().toIso8601String(),
+  final EduPayApiService _apiService;
+
+  Future<ReceiptModel> verifyOnline(String identifier) async {
+    final savedAdmin = StorageService.getAdmin();
+    if (savedAdmin == null) {
+      throw Exception(AppStrings.sessionExpiredPleaseLogin);
+    }
+
+    final adminJson = jsonDecode(savedAdmin) as Map<String, dynamic>;
+    final admin = AdminModel.fromJson(adminJson);
+
+    if (admin.authToken == null || admin.authToken!.isEmpty) {
+      throw Exception(AppStrings.sessionExpiredPleaseLogin);
+    }
+
+    return _apiService.findReceiptByIdentifier(
+      authToken: admin.authToken!,
+      identifier: identifier,
     );
   }
 
@@ -61,7 +61,8 @@ class VerificationService {
 }
 
 final verificationServiceProvider = Provider<VerificationService>((ref) {
-  return VerificationService();
+  final apiService = ref.watch(edupayApiServiceProvider);
+  return VerificationService(apiService);
 });
 
 class VerificationNotifier extends StateNotifier<AsyncValue<ReceiptModel?>> {

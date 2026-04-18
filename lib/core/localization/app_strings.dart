@@ -7,16 +7,18 @@ class AppStrings {
   // Auth
   static const String adminLogin = 'Admin Login';
   static const String verifyReceiptAuth = 'Verify receipt authenticity';
-  static const String username = 'Username';
+  static const String username = 'Email';
   static const String password = 'Password';
   static const String signIn = 'Sign In';
   static const String signingIn = 'Signing in...';
   static const String logout = 'Logout';
   static const String loggedOut = 'Logged out';
   static const String loginSuccessful = 'Login successful';
-  static const String invalidCredentials = 'Invalid credentials';
+  static const String invalidCredentials = 'Invalid email or password';
   static const String pleaseEnterCredentials =
-      'Please enter both username and password';
+      'Please enter both email and password';
+  static const String sessionExpiredPleaseLogin =
+      'Session expired. Please sign in again';
 
   // Dashboard
   static const String welcome = 'Welcome';
@@ -78,6 +80,8 @@ class AppStrings {
   static const String downloadingRecords = 'Downloading records...';
   static const String recordsDownloaded = 'records downloaded';
   static const String downloadFailed = 'Download failed';
+  static const String noRecordsFoundForSelectedDateRange =
+      'No records found for the selected date range';
   static const String downloadRequiresInternet =
       'Download requires internet connection';
   static const String totalRecords = 'Total Records';
@@ -107,4 +111,5 @@ class AppStrings {
   static const String close = 'Close';
   static const String yes = 'Yes';
   static const String no = 'No';
+  static const String goBack = 'Go Back';
 }

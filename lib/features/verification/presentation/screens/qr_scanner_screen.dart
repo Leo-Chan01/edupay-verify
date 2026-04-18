@@ -97,7 +97,7 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
         children: [
           MobileScanner(
             controller: _scannerController,
-            errorBuilder: (context, error, child) {
+            errorBuilder: (context, error) {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16),

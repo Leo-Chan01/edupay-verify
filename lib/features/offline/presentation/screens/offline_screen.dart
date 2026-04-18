@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:edupay_verify/core/localization/app_strings.dart';
-import 'package:edupay_verify/features/offline/providers/offline_provider.dart';
-import 'package:edupay_verify/features/offline/models/offline_data_model.dart';
-import 'package:edupay_verify/features/offline/presentation/widgets/offline_stats_card.dart';
-import 'package:edupay_verify/features/offline/presentation/widgets/date_range_selector.dart';
 import 'package:edupay_verify/core/services/snackbar_service.dart';
+import 'package:edupay_verify/features/offline/providers/offline_provider.dart';
+import 'package:edupay_verify/features/offline/presentation/widgets/date_range_selector.dart';
+import 'package:edupay_verify/features/offline/presentation/widgets/offline_stats_card.dart';
 
 class OfflineScreen extends ConsumerStatefulWidget {
   const OfflineScreen({super.key});
@@ -21,84 +20,24 @@ class _OfflineScreenState extends ConsumerState<OfflineScreen> {
     setState(() => _isDownloading = true);
 
     try {
-      // Simulate API call to download records
-      await Future.delayed(const Duration(seconds: 2));
-
-      // Generate mock offline data
-      final List<Map<String, dynamic>> records = _generateMockRecords(
-        dateFrom,
-        dateTo,
-      );
-
-      if (records.isEmpty) {
-        SnackbarService.showWarning('No records found for selected date range');
-        setState(() => _isDownloading = false);
-        return;
-      }
-
-      final offlineData = OfflineDataModel(
-        records: records,
-        downloadedAt: DateTime.now(),
-        dateFrom: dateFrom,
-        dateTo: dateTo,
-      );
-
-      await ref.read(offlineProvider.notifier).saveOfflineData(offlineData);
+      final recordCount = await ref
+          .read(offlineProvider.notifier)
+          .downloadOfflineData(dateFrom: dateFrom, dateTo: dateTo);
 
       if (mounted) {
         SnackbarService.showSuccess(
-          '${records.length} ${AppStrings.recordsDownloaded}',
+          '$recordCount ${AppStrings.recordsDownloaded}',
         );
       }
     } catch (e) {
       if (mounted) {
-        SnackbarService.showError('${AppStrings.downloadFailed}: $e');
+        SnackbarService.showError(e.toString().replaceFirst('Exception: ', ''));
       }
     } finally {
       if (mounted) {
         setState(() => _isDownloading = false);
       }
     }
-  }
-
-  List<Map<String, dynamic>> _generateMockRecords(
-    DateTime? dateFrom,
-    DateTime? dateTo,
-  ) {
-    final records = <Map<String, dynamic>>[];
-    final now = DateTime.now();
-    final from = dateFrom ?? now.subtract(const Duration(days: 30));
-    final to = dateTo ?? now;
-
-    // Generate sample records for the date range
-    for (int i = 0; i < 25; i++) {
-      final dayOffset = (i * (to.difference(from).inDays ~/ 25)).clamp(
-        0,
-        to.difference(from).inDays,
-      );
-      final recordDate = from.add(Duration(days: dayOffset));
-
-      records.add({
-        'receipt_id': 'RCP${1000 + i}',
-        'reference': 'REF${2000 + i}',
-        'student_id': 'STU${3000 + i}',
-        'student_name': 'Student ${i + 1}',
-        'program': 'Engineering',
-        'session': '2025/2026',
-        'transaction_id': 'TXN${4000 + i}',
-        'description': 'Tuition Fee Payment',
-        'amount': '₦110.00',
-        'payment_type': 'Part Payment',
-        'fees_total_paid': '₦4,410.00',
-        'outstanding': '₦45,590.00',
-        'date_time': recordDate.toString(),
-        'payment_method': 'online',
-        'status': 'Success',
-        'remarks': 'Payment received',
-      });
-    }
-
-    return records;
   }
 
   Future<void> _handleDeleteData() async {

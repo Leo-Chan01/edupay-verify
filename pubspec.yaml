@@ -43,7 +43,7 @@ dependencies:
   shared_preferences: ^2.3.3
   
   # QR Code Scanning
-  mobile_scanner: ^5.2.3
+  mobile_scanner: ^7.2.0
   
   # Icons
   cupertino_icons: ^1.0.8
@@ -51,6 +51,9 @@ dependencies:
   
   # Connectivity
   connectivity_plus: ^6.1.1
+  
+  # Networking
+  http: ^1.5.0
   
   # Utilities
   intl: ^0.20.1
