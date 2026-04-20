@@ -47,10 +47,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
       try {
         final adminJson = jsonDecode(savedAdmin) as Map<String, dynamic>;
         final admin = AdminModel.fromJson(adminJson);
-        state = state.copyWith(
-          isLoggedIn: true,
-          admin: admin,
-        );
+
+        if (admin.authToken == null || admin.authToken!.isEmpty) {
+          await StorageService.removeAdmin();
+          return;
+        }
+
+        state = state.copyWith(isLoggedIn: true, admin: admin);
       } catch (_) {
         await StorageService.removeAdmin();
       }
@@ -59,9 +62,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<bool> login(String username, String password) async {
     if (username.trim().isEmpty || password.trim().isEmpty) {
-      state = state.copyWith(
-        errorMessage: AppStrings.pleaseEnterCredentials,
-      );
+      state = state.copyWith(errorMessage: AppStrings.pleaseEnterCredentials);
       return false;
     }
 
@@ -75,11 +76,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
       await StorageService.saveAdmin(jsonEncode(admin.toJson()));
 
-      state = state.copyWith(
-        isLoggedIn: true,
-        admin: admin,
-        isLoading: false,
-      );
+      state = state.copyWith(isLoggedIn: true, admin: admin, isLoading: false);
 
       return true;
     } catch (e) {

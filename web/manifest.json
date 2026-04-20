@@ -1,11 +1,11 @@
 {
-    "name": "edupay_verify",
-    "short_name": "edupay_verify",
+    "name": "Edupay",
+    "short_name": "Edupay",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Edupay - Education Payment Platform",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

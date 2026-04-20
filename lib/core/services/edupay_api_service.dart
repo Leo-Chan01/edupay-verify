@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:edupay_verify/core/localization/app_strings.dart';
 import 'package:edupay_verify/core/services/custom_log_file.dart';
 import 'package:edupay_verify/core/services/http_logging_interceptor.dart';
+import 'package:edupay_verify/core/services/storage_service.dart';
 import 'package:edupay_verify/features/auth/data/models/admin_model.dart';
 import 'package:edupay_verify/features/verification/models/receipt_model.dart';
 
@@ -202,6 +203,15 @@ class EduPayApiService {
         decoded['message'],
         fallback: AppStrings.invalidCredentials,
       );
+
+      if (message.toLowerCase().contains('invalid or expired token')) {
+        await StorageService.removeAdmin();
+        CustomLogFile.error(
+          'API business failure for action ${body['action']}: $message',
+        );
+        throw Exception(AppStrings.sessionExpiredPleaseLogin);
+      }
+
       CustomLogFile.error(
         'API business failure for action ${body['action']}: $message',
       );

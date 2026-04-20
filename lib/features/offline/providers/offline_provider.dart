@@ -5,14 +5,16 @@ import 'package:edupay_verify/core/localization/app_strings.dart';
 import 'package:edupay_verify/core/services/edupay_api_service.dart';
 import 'package:edupay_verify/core/services/storage_service.dart';
 import 'package:edupay_verify/features/auth/data/models/admin_model.dart';
+import 'package:edupay_verify/features/auth/providers/auth_provider.dart';
 import 'package:edupay_verify/features/offline/models/offline_data_model.dart';
 
 class OfflineNotifier extends StateNotifier<OfflineDataModel?> {
-  OfflineNotifier(this._apiService) : super(null) {
+  OfflineNotifier(this._apiService, this._readAuthToken) : super(null) {
     _loadOfflineData();
   }
 
   final EduPayApiService _apiService;
+  final String? Function() _readAuthToken;
 
   void _loadOfflineData() {
     final dataJson = StorageService.getOfflineData();
@@ -29,20 +31,13 @@ class OfflineNotifier extends StateNotifier<OfflineDataModel?> {
     DateTime? dateFrom,
     DateTime? dateTo,
   }) async {
-    final savedAdmin = StorageService.getAdmin();
-    if (savedAdmin == null) {
-      throw Exception(AppStrings.sessionExpiredPleaseLogin);
-    }
-
-    final adminJson = jsonDecode(savedAdmin) as Map<String, dynamic>;
-    final admin = AdminModel.fromJson(adminJson);
-
-    if (admin.authToken == null || admin.authToken!.isEmpty) {
+    final authToken = _readAuthToken() ?? _readStoredAuthToken();
+    if (authToken == null || authToken.isEmpty) {
       throw Exception(AppStrings.sessionExpiredPleaseLogin);
     }
 
     final records = await _apiService.getTransactions(
-      authToken: admin.authToken!,
+      authToken: authToken,
       rowsPerPage: 200,
       dateFrom: dateFrom,
       dateTo: dateTo,
@@ -63,6 +58,17 @@ class OfflineNotifier extends StateNotifier<OfflineDataModel?> {
     return records.length;
   }
 
+  String? _readStoredAuthToken() {
+    final savedAdmin = StorageService.getAdmin();
+    if (savedAdmin == null) {
+      return null;
+    }
+
+    final adminJson = jsonDecode(savedAdmin) as Map<String, dynamic>;
+    final admin = AdminModel.fromJson(adminJson);
+    return admin.authToken;
+  }
+
   Future<void> saveOfflineData(OfflineDataModel data) async {
     await StorageService.saveOfflineData(data.toJsonString());
     state = data;
@@ -81,5 +87,9 @@ class OfflineNotifier extends StateNotifier<OfflineDataModel?> {
 final offlineProvider =
     StateNotifierProvider<OfflineNotifier, OfflineDataModel?>((ref) {
       final apiService = ref.watch(edupayApiServiceProvider);
-      return OfflineNotifier(apiService);
+      final authToken = ref.watch(
+        authProvider.select((state) => state.admin?.authToken),
+      );
+
+      return OfflineNotifier(apiService, () => authToken);
     });

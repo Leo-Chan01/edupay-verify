@@ -30,11 +30,12 @@ class AdminModel {
     return AdminModel(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
-      username:
-          json['username']?.toString() ?? json['email']?.toString() ?? '',
+      username: json['username']?.toString() ?? json['email']?.toString() ?? '',
       email: json['email']?.toString(),
-      authToken: json['auth_token']?.toString(),
-      userLevel: json['user_level']?.toString(),
+      authToken:
+          json['auth_token']?.toString() ?? json['session_token']?.toString(),
+      userLevel:
+          json['user_level']?.toString() ?? json['userlevel']?.toString(),
     );
   }
 }

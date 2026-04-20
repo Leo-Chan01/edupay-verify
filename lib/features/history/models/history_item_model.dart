@@ -57,15 +57,18 @@ class HistoryItemModel {
 
   factory HistoryItemModel.fromJson(Map<String, dynamic> json) {
     return HistoryItemModel(
-      receiptId: json['receipt_id'] as String,
-      transactionId: json['transaction_id'] as String,
-      studentName: json['student_name'] as String,
-      studentId: json['student_id'] as String,
-      program: json['program'] as String,
-      amount: json['amount'] as String,
-      status: json['status'] as String,
-      dateTime: json['date_time'] as String,
-      verificationTime: json['verification_time'] as String,
+      receiptId: json['receipt_id']?.toString() ?? '',
+      transactionId: json['transaction_id']?.toString() ?? '',
+      studentName: json['student_name']?.toString() ?? '',
+      studentId: json['student_id']?.toString() ?? 'N/A',
+      program: json['program']?.toString() ?? 'N/A',
+      amount: json['amount']?.toString() ?? '',
+      status: json['status']?.toString() ?? '',
+      dateTime: json['date_time']?.toString() ?? '',
+      verificationTime:
+          json['verification_time']?.toString() ??
+          json['date_time']?.toString() ??
+          DateTime.now().toIso8601String(),
       offline: json['offline'] as bool? ?? false,
     );
   }
