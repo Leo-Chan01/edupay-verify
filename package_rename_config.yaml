@@ -1,32 +1,32 @@
 package_rename_config:
   android:
-    app_name: "Edupay" # Display name
+    app_name: "Edupay Verify" # Display name
     package_name: "com.coderstriangle.edupay" # Package name
-    # override_old_package: "com.dailynuggets.daily_nuggets_official" # Optional: Cleans up old folder structure
+    # override_old_package: "com.org.example" # Optional: Cleans up old folder structure
     lang: "kotlin" # Optional: "kotlin" (default) or "java"
 
   ios:
-    app_name: "Edupay" # Display name
+    app_name: "Edupay Verify" # Display name
     bundle_name: "Edupay" # Bundle name
     package_name: "com.coderstriangle.edupay" # Product Bundle Identifier
 
-  linux:
-    app_name: "Edupay" # Window title
-    package_name: "com.coderstriangle.edupay" # Application ID
-    exe_name: "edupay" # Executable name (binary)
+  # linux:
+  #   app_name: "Edupay Verification" # Window title
+  #   package_name: "com.coderstriangle.edupay" # Application ID
+  #   exe_name: "edupay_verify" # Executable name (binary)
 
-  macos:
-    app_name: "Edupay" # Product name
-    package_name: "com.coderstriangle.edupay" # Product Bundle Identifier
-    copyright_notice: "Copyright © 2026" # Copyright notice
+  # macos:
+  #   app_name: "Edupay Verification" # Product name
+  #   package_name: "com.coderstriangle.edupay" # Product Bundle Identifier
+  #   copyright_notice: "Copyright © 2026" # Copyright notice
 
-  web:
-    app_name: "Edupay" # App title & PWA name
-    short_app_name: "Edupay" # PWA short name (defaults to app_name)
-    description: "Edupay - Education Payment Platform" # Web app description
+  # web:
+  #   app_name: "Edupay Verification" # App title & PWA name
+  #   short_app_name: "Edupay Verification" # PWA short name (defaults to app_name)
+  #   description: "Edupay Verification - Education Payment Platform" # Web app description
 
-  windows:
-    app_name: "Edupay" # Window title & Software name
-    organization: "CODER'S TRIANGLE" # Organization/Company name
-    copyright_notice: "Copyright © 2026" # Legal copyright
-    exe_name: "edupay" # Executable name (binary)
+  # windows:
+  #   app_name: "Edupay Verification" # Window title & Software name
+  #   organization: "CODER'S TRIANGLE" # Organization/Company name
+  #   copyright_notice: "Copyright © 2026" # Legal copyright
+  #   exe_name: "edupay_verify" # Executable name (binary)

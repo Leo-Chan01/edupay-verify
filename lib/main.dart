@@ -19,7 +19,7 @@ class MyApp extends ConsumerWidget {
     final router = ref.watch(goRouterProvider);
 
     return MaterialApp.router(
-      title: 'EduPay Receipt Check',
+      title: 'Edupay Verification',
       theme: AppTheme.lightTheme,
       scaffoldMessengerKey: SnackbarService.scaffoldMessengerKey,
       debugShowCheckedModeBanner: false,

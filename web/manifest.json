@@ -1,11 +1,11 @@
 {
-    "name": "Edupay",
-    "short_name": "Edupay",
+    "name": "Edupay Verification",
+    "short_name": "Edupay Verification",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Edupay - Education Payment Platform",
+    "description": "Edupay Verification - Education Payment Platform",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
