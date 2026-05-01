@@ -11,14 +11,20 @@ class DateRangeSelector extends StatefulWidget {
 }
 
 class _DateRangeSelectorState extends State<DateRangeSelector> {
-  DateTime? _dateFrom;
-  DateTime? _dateTo;
+  late DateTime _dateFrom;
+  late DateTime _dateTo;
+
+  @override
+  void initState() {
+    super.initState();
+    _dateTo = DateTime.now();
+    _dateFrom = DateTime.now().subtract(const Duration(days: 30));
+  }
 
   Future<void> _selectFromDate(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,
-      initialDate:
-          _dateFrom ?? DateTime.now().subtract(const Duration(days: 30)),
+      initialDate: _dateFrom,
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
     );
@@ -33,8 +39,8 @@ class _DateRangeSelectorState extends State<DateRangeSelector> {
   Future<void> _selectToDate(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,
-      initialDate: _dateTo ?? DateTime.now(),
-      firstDate: _dateFrom ?? DateTime(2020),
+      initialDate: _dateTo,
+      firstDate: _dateFrom,
       lastDate: DateTime.now(),
     );
 
@@ -46,21 +52,17 @@ class _DateRangeSelectorState extends State<DateRangeSelector> {
   }
 
   bool _validateDates() {
-    if (_dateFrom == null || _dateTo == null) {
-      return true; // Allow proceeding without selection
-    }
-
-    if (_dateTo!.isBefore(_dateFrom!)) {
+    if (_dateTo.isBefore(_dateFrom)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: const Text(AppStrings.endDateMustBeAfterStartDate)),
+        const SnackBar(content: Text(AppStrings.endDateMustBeAfterStartDate)),
       );
       return false;
     }
 
-    final difference = _dateTo!.difference(_dateFrom!).inDays;
+    final difference = _dateTo.difference(_dateFrom).inDays;
     if (difference > 365) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: const Text(AppStrings.dateRangeExceedsOneYear)),
+        const SnackBar(content: Text(AppStrings.dateRangeExceedsOneYear)),
       );
       return false;
     }
@@ -74,6 +76,8 @@ class _DateRangeSelectorState extends State<DateRangeSelector> {
     final textTheme = Theme.of(context).textTheme;
 
     return Card(
+      elevation: 0,
+      color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -96,13 +100,14 @@ class _DateRangeSelectorState extends State<DateRangeSelector> {
                       const SizedBox(height: 8),
                       InkWell(
                         onTap: () => _selectFromDate(context),
+                        borderRadius: BorderRadius.circular(8),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 10,
                           ),
                           decoration: BoxDecoration(
-                            border: Border.all(color: colorScheme.outline),
+                            color: colorScheme.surface,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -114,9 +119,7 @@ class _DateRangeSelectorState extends State<DateRangeSelector> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                _dateFrom != null
-                                    ? '${_dateFrom!.day}/${_dateFrom!.month}/${_dateFrom!.year}'
-                                    : 'Select',
+                                '${_dateFrom.day}/${_dateFrom.month}/${_dateFrom.year}',
                                 style: textTheme.bodySmall,
                               ),
                             ],
@@ -140,13 +143,14 @@ class _DateRangeSelectorState extends State<DateRangeSelector> {
                       const SizedBox(height: 8),
                       InkWell(
                         onTap: () => _selectToDate(context),
+                        borderRadius: BorderRadius.circular(8),
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 10,
                           ),
                           decoration: BoxDecoration(
-                            border: Border.all(color: colorScheme.outline),
+                            color: colorScheme.surface,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -158,9 +162,7 @@ class _DateRangeSelectorState extends State<DateRangeSelector> {
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                _dateTo != null
-                                    ? '${_dateTo!.day}/${_dateTo!.month}/${_dateTo!.year}'
-                                    : 'Select',
+                                '${_dateTo.day}/${_dateTo.month}/${_dateTo.year}',
                                 style: textTheme.bodySmall,
                               ),
                             ],

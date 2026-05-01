@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:go_router/go_router.dart';
 import 'package:edupay_verify/core/localization/app_strings.dart';
 import 'package:edupay_verify/core/services/snackbar_service.dart';
-import 'package:edupay_verify/features/verification/providers/verification_provider.dart';
+import 'package:edupay_verify/features/verification/presentation/bloc/verification_bloc.dart';
+import 'package:edupay_verify/features/verification/presentation/bloc/verification_event.dart';
+import 'package:edupay_verify/features/verification/presentation/bloc/verification_state.dart';
+import 'package:edupay_verify/features/verification/presentation/widgets/scanner_overlay_widget.dart';
+import 'package:edupay_verify/features/verification/presentation/widgets/scanner_instructions_widget.dart';
 
-class QRScannerScreen extends ConsumerStatefulWidget {
+class QRScannerScreen extends StatefulWidget {
   const QRScannerScreen({super.key});
 
   @override
-  ConsumerState<QRScannerScreen> createState() => _QRScannerScreenState();
+  State<QRScannerScreen> createState() => _QRScannerScreenState();
 }
 
-class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
+class _QRScannerScreenState extends State<QRScannerScreen> {
   late MobileScannerController _scannerController;
-  bool _isProcessing = false;
 
   @override
   void initState() {
@@ -32,51 +35,32 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
     super.dispose();
   }
 
-  Future<void> _handleQRCodeDetected(Barcode barcode) async {
-    if (_isProcessing) return;
-
-    _isProcessing = true;
+  void _handleQRCodeDetected(Barcode barcode) {
     final scannedValue = barcode.rawValue;
 
     if (scannedValue == null) {
       SnackbarService.showError('Failed to scan QR code');
-      _isProcessing = false;
       return;
     }
 
+    String receiptId = scannedValue;
+
+    // Try to parse as JSON first
     try {
-      String receiptId = scannedValue;
-
-      // Try to parse as JSON first
-      try {
-        final jsonData = _parseQRJsonData(scannedValue);
-        receiptId = jsonData['receipt_id'] ?? scannedValue;
-      } catch (_) {
-        // If not JSON, try simple format: receipt_id:reference:timestamp
-        final parts = scannedValue.split(':');
-        if (parts.isNotEmpty) {
-          receiptId = parts[0];
-        }
-      }
-
-      if (!mounted) return;
-
-      await ref.read(verificationProvider.notifier).verifyReceipt(receiptId);
-
-      if (!mounted) return;
-
-      context.pop();
-      context.pushNamed('verification-result');
-    } catch (e) {
-      if (mounted) {
-        SnackbarService.showError('Error processing QR code: $e');
-        _isProcessing = false;
+      final jsonData = _parseQRJsonData(scannedValue);
+      receiptId = jsonData['receipt_id'] ?? scannedValue;
+    } catch (_) {
+      // If not JSON, try simple format: receipt_id:reference:timestamp
+      final parts = scannedValue.split(':');
+      if (parts.isNotEmpty) {
+        receiptId = parts[0];
       }
     }
+
+    context.read<VerificationBloc>().add(VerifyReceiptEvent(receiptId));
   }
 
   Map<String, dynamic> _parseQRJsonData(String data) {
-    // This would typically use jsonDecode, but for demo we'll just handle simple cases
     return {'receipt_id': data};
   }
 
@@ -85,127 +69,102 @@ class _QRScannerScreenState extends ConsumerState<QRScannerScreen> {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.scanReceiptQRCode),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+    return BlocListener<VerificationBloc, VerificationState>(
+      listener: (context, state) {
+        if (state is VerificationSuccess) {
+          context.pop();
+          context.pushNamed('verification-result');
+        } else if (state is VerificationError) {
+          SnackbarService.showError('Error processing QR code: ${state.message}');
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text(AppStrings.scanReceiptQRCode),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.pop(),
+          ),
         ),
-      ),
-      body: Stack(
-        children: [
-          MobileScanner(
-            controller: _scannerController,
-            errorBuilder: (context, error) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: colorScheme.error,
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        AppStrings.cameraAccessDenied,
-                        style: textTheme.titleMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Please enable camera permissions in Settings.',
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
+        body: Stack(
+          children: [
+            MobileScanner(
+              controller: _scannerController,
+              errorBuilder: (context, error) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: colorScheme.error,
                         ),
-                        textAlign: TextAlign.center,
+                        const SizedBox(height: 16),
+                        Text(
+                          AppStrings.cameraAccessDenied,
+                          style: textTheme.titleMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Please enable camera permissions in Settings.',
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+              onDetect: (capture) {
+                final List<Barcode> barcodes = capture.barcodes;
+                for (final barcode in barcodes) {
+                  _handleQRCodeDetected(barcode);
+                  break;
+                }
+              },
+            ),
+            const ScannerOverlayWidget(),
+            const Positioned(
+              bottom: 24,
+              left: 0,
+              right: 0,
+              child: ScannerInstructionsWidget(),
+            ),
+            BlocBuilder<VerificationBloc, VerificationState>(
+              builder: (context, state) {
+                if (state is VerificationLoading) {
+                  return Container(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            CircularProgressIndicator(color: colorScheme.primary),
+                            const SizedBox(height: 16),
+                            Text(
+                              AppStrings.checkingReceipt,
+                              style: textTheme.labelMedium,
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                ),
-              );
-            },
-            onDetect: (capture) {
-              final List<Barcode> barcodes = capture.barcodes;
-              for (final barcode in barcodes) {
-                _handleQRCodeDetected(barcode);
-                break;
-              }
-            },
-          ),
-          // Scanner overlay
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(
-                color: colorScheme.primary.withValues(alpha: 0.5),
-                width: 2,
-              ),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.5),
-                  blurRadius: 10,
-                ),
-              ],
-            ),
-            margin: const EdgeInsets.all(50),
-          ),
-          // Instructions
-          Positioned(
-            bottom: 24,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
                     ),
-                    decoration: BoxDecoration(
-                      color: colorScheme.surface.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      AppStrings.pointCameraAtQR,
-                      style: textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             ),
-          ),
-          // Processing overlay
-          if (_isProcessing)
-            Container(
-              color: Colors.black.withValues(alpha: 0.3),
-              child: Center(
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surface,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      CircularProgressIndicator(color: colorScheme.primary),
-                      const SizedBox(height: 16),
-                      Text(
-                        AppStrings.checkingReceipt,
-                        style: textTheme.labelMedium,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }

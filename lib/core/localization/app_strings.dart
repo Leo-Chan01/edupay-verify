@@ -29,15 +29,15 @@ class AppStrings {
   static const String scanQRCode = 'Scan QR Code';
   static const String scanQRCodeDesc = 'Scan receipt QR code';
   static const String manualSearch = 'Manual Search';
-  static const String manualSearchDesc = 'Search by receipt ID';
-  static const String scanReceiptQRCode = 'Scan Receipt QR Code';
+  static const String manualSearchDesc = 'Search by Transaction ID';
+  static const String scanReceiptQRCode = 'Scan Transaction QR Code';
   static const String pointCameraAtQR =
-      'Point camera at the QR code on the receipt';
-  static const String enterReceiptID = 'Enter receipt ID or reference';
+      'Point camera at the QR code on the transaction';
+  static const String enterReceiptID = 'Enter Transaction ID or reference';
   static const String search = 'Search';
   static const String searchingReceipt = 'Searching...';
-  static const String checkingReceipt = 'Checking receipt...';
-  static const String pleaseEnterReceiptID = 'Please enter receipt ID';
+  static const String checkingReceipt = 'Checking Transaction...';
+  static const String pleaseEnterReceiptID = 'Please enter Transaction ID';
   static const String qrScannerNotAvailable = 'QR scanner not available';
   static const String cameraAccessDenied = 'Camera Access Denied';
 
@@ -58,7 +58,7 @@ class AppStrings {
   static const String remarks = 'Remarks';
   static const String mode = 'Mode';
   static const String offlineVerification = 'Offline Verification';
-  static const String receiptNotFound = 'Receipt not found';
+  static const String receiptNotFound = 'Transaction not found';
 
   // History
   static const String history = 'History';
@@ -67,7 +67,7 @@ class AppStrings {
   static const String clearAllHistory = 'Clear all verification history?';
   static const String historyCleared = 'History cleared';
   static const String noHistoryYet = 'No history yet';
-  static const String noHistoryDesc = 'Verified receipts will appear here';
+  static const String noHistoryDesc = 'Verified transactions will appear here';
   static const String verifiedAt = 'Verified at';
 
   // Offline Management

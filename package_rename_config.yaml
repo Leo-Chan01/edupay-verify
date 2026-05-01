@@ -1,14 +1,14 @@
 package_rename_config:
   android:
-    app_name: "Edupay Verify" # Display name
-    package_name: "com.coderstriangle.edupay" # Package name
+    app_name: "EduPay Verify" # Display name
+    package_name: "com.coderstriangle.edupay_verify" # Package name
     # override_old_package: "com.org.example" # Optional: Cleans up old folder structure
     lang: "kotlin" # Optional: "kotlin" (default) or "java"
 
   ios:
-    app_name: "Edupay Verify" # Display name
-    bundle_name: "Edupay" # Bundle name
-    package_name: "com.coderstriangle.edupay" # Product Bundle Identifier
+    app_name: "EduPay Verify" # Display name
+    bundle_name: "EduPayVerify" # Bundle name
+    package_name: "com.coderstriangle.edupay_verify" # Product Bundle Identifier
 
   # linux:
   #   app_name: "Edupay Verification" # Window title

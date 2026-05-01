@@ -75,39 +75,3 @@ final verificationServiceProvider = Provider<VerificationService>((ref) {
   return VerificationService(apiService, () => authToken);
 });
 
-class VerificationNotifier extends StateNotifier<AsyncValue<ReceiptModel?>> {
-  final VerificationService _service;
-  final bool Function() _isOnline;
-
-  VerificationNotifier(this._service, this._isOnline)
-    : super(const AsyncValue.data(null));
-
-  Future<void> verifyReceipt(String identifier) async {
-    state = const AsyncValue.loading();
-
-    try {
-      final receipt = _isOnline()
-          ? await _service.verifyOnline(identifier)
-          : await _service.verifyOffline(identifier);
-
-      state = AsyncValue.data(receipt);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-    }
-  }
-
-  void clearReceipt() {
-    state = const AsyncValue.data(null);
-  }
-}
-
-final verificationProvider =
-    StateNotifierProvider<VerificationNotifier, AsyncValue<ReceiptModel?>>((
-      ref,
-    ) {
-      final service = ref.watch(verificationServiceProvider);
-      return VerificationNotifier(service, () {
-        // This will be properly connected to connectivity service
-        return true;
-      });
-    });
